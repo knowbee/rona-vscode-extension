@@ -2,9 +2,14 @@
 	"name": "require-to-import-syntax",
 	"displayName": "Require To Import Syntax",
 	"description": "Convert require to ES6 import syntax",
+	"publisher": "Igwaneza Bruce",
 	"version": "0.0.1",
 	"engines": {
 		"vscode": "^1.43.0"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/knowbee/rona-vscode-extension"
 	},
 	"categories": [
 		"Other"
