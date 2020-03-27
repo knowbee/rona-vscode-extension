@@ -1,5 +1,5 @@
 {
-	"name": "require-to-import-syntax",
+	"name": "rona",
 	"displayName": "Require To Import Syntax",
 	"description": "Convert require to ES6 import syntax",
 	"publisher": "Bruce",
