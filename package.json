@@ -4,6 +4,7 @@
 	"description": "Convert require to ES6 import syntax",
 	"publisher": "Bruce",
 	"version": "0.1.0",
+	"icon": "logo.png",
 	"engines": {
 		"vscode": "^1.43.0"
 	},
