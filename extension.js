@@ -10,11 +10,11 @@ function activate(context) {
   let disposable = vscode.commands.registerCommand(
     "extension.Rona",
     function() {
-      const re_normal = /^(const|let|var)\s+(\w+)\s+=(\s*require\((.\w+.))\)(;|)$/gim; // const name = require("name");
+      const re_normal = /^(const|let|var)\s+(\w+)\s+=(\s*require\((.+?))\)(;|)$/gim; // const name = require("name");
       const re_unique = /^(const|let|var)\s+(\w+)\s+=\s+require\((.+?)\).(\w+)(;|)$/gim; // const Bob = require("name").first
       const re_special = /^(const|let|var)\s+\{\s*(\w+.+)\s*}\s+=\s+require\((.+?)\)(;|)$/gim; // const { name } = require("name")
       const re_direct = /^require\((.+?)\)(;|)$/gim; // require("things")
-      const re_invoked = /^(const|let|var)\s*(\w+)\s*=(\s*require\((.\w+.))\)\(\)(;|)$/gim; // const name = require("person")()
+      const re_invoked = /^(const|let|var)\s*(\w+)\s*=(\s*require\((.+?))\)\(\)(;|)$/gim; // const name = require("person")()
       const re_unique_invoked = /^(const|let|var)\s+(\w+)\s+=\s+require\((.+?)\).(\w+)\(\)(;|)$/gim; // const something = require("things").something()
       fs.writeFileSync(
         editor.document.uri.fsPath,
