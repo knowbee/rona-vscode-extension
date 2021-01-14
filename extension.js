@@ -2,7 +2,6 @@
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require("vscode");
 const fs = require("fs");
-let editor = vscode.window.activeTextEditor;
 /**
  * @param {vscode.ExtensionContext} context
  */
@@ -10,6 +9,7 @@ function activate(context) {
   let disposable = vscode.commands.registerCommand(
     "extension.Rona",
     function() {
+      const editor = vscode.window.activeTextEditor;
       const re_normal = /^(const|let|var)\s+(\w+)\s+=(\s*require\((.+?))\)(;|)$/gim; // const name = require("name");
       const re_unique = /^(const|let|var)\s+(\w+)\s+=\s+require\((.+?)\).(\w+)(;|)$/gim; // const Bob = require("name").first
       const re_special = /^(const|let|var)\s+\{\s*(\w+.+)\s*}\s+=\s+require\((.+?)\)(;|)$/gim; // const { name } = require("name")
