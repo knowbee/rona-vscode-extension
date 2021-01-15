@@ -3,7 +3,7 @@
   "displayName": "Require To Import Syntax",
   "description": "Convert require to ES6 import syntax",
   "publisher": "Bruce",
-  "version": "0.3.0",
+  "version": "1.0.2",
   "icon": "logo.png",
   "engines": {
     "vscode": "^1.43.0"
