@@ -8,7 +8,7 @@ const fs = require("fs");
 function activate(context) {
   let disposable = vscode.commands.registerCommand(
     "extension.Rona",
-    function() {
+    function () {
       const editor = vscode.window.activeTextEditor;
       const re_normal = /^(const|let|var)\s+(\w+)\s+=(\s*require\((.+?))\)(;|)$/gim; // const name = require("name");
       const re_unique = /^(const|let|var)\s+(\w+)\s+=\s+require\((.+?)\).(\w+)(;|)$/gim; // const Bob = require("name").first
@@ -28,9 +28,6 @@ function activate(context) {
           .replace(re_unique_invoked, `import { $4 } from $3`)
           .replace(re_special, `import { $2 } from $3`)
       );
-      vscode.window.showInformationMessage(
-        "file has been converted successfully"
-      );
     }
   );
 
@@ -43,5 +40,5 @@ function deactivate() {}
 
 module.exports = {
   activate,
-  deactivate
+  deactivate,
 };
