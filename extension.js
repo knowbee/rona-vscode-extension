@@ -17,12 +17,13 @@ function activate(context) {
       const re_invoked = /^(const|let|var)\s*(\w+)\s*=(\s*require\((.+?))\)\(\)(;|)$/gim; // const name = require("person")()
       const re_unique_invoked = /^(const|let|var)\s+(\w+)\s+=\s+require\((.+?)\).(\w+)\(\)(;|)$/gim; // const something = require("things").something()
       const re_aliased = /^(const|let|var)\s*\{\s*((\w+)\s*\:\s*(\w+))\s*}\s*=\s*require\((.+?)\)(;|)$/gim; // const { name:anotherName } = require("name")
-      const re_general = /\s*(?:(?:const|let|var)\s+)?(\{?[\w,\s]+\}?)\s+=\s+require\((?:'|")([\w-\.\/]+)(?:'|")\)(;|,)?/gim;
+      const re_general = /\s*(?:(?:const|let|var)\s+)?(\{?[\w,\s]+\}?)\s+=\s+require\((.+?)\)(;|)$/gim;
 
       fs.writeFileSync(
         editor.document.uri.fsPath,
         fs
           .readFileSync(editor.document.uri.fsPath, "utf-8")
+          .replace(":", " as ")
           .replace(re_invoked, `import $2 from $4`)
           .replace(re_unique_invoked, `import { $4 } from $3`)
           .replace(re_aliased, `import { $3 as $4 } from $5`)
