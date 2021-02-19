@@ -30,7 +30,7 @@ const {
   shape,
   color,
  } from "module"
-const { thing: thingRenamed } = require("module"); // => import { thing: thingRenamed } from "module";
+const { thing: thingRenamed } = require("module"); // => import { thing as thingRenamed } from "module";
 ```
 
 ## License
