@@ -6,13 +6,6 @@ convert require syntax to ES6 import syntax in the current opened file
 
 cli tool version of this extension can be found [here](https://www.npmjs.com/package/rona)
 
-## Preview
-
-<p>
-    <img src="https://raw.githubusercontent.com/knowbee/hosting/master/assets/rona_before.PNG" width="400px" height="100" hspace="10"/>
-    <img src="https://raw.githubusercontent.com/knowbee/hosting/master/assets/rona_after.PNG" width="400px" height="100" hspace="10"/>
-</p>
-
 ## Features
 
 ```js
@@ -24,6 +17,20 @@ const something = require("things")(); // => import something from "things";
 require("things"); // => import "things";
 require("../things"); // => import "../things";
 const something = require("things").something(); // => import { something } from "things";
+const {
+  thing,
+  anotherThing,
+  widget,
+  shape,
+  color,
+} = require("module"); // => import {
+  thing,
+  anotherThing,
+  widget,
+  shape,
+  color,
+ } from "module"
+const { thing: thingRenamed } = require("module"); // => import { thing: thingRenamed } from "module";
 ```
 
 ## License
