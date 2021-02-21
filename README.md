@@ -17,21 +17,10 @@ const something = require("things")(); // => import something from "things";
 require("things"); // => import "things";
 require("../things"); // => import "../things";
 const something = require("things").something(); // => import { something } from "things";
-const {
-  thing,
-  anotherThing,
-  widget,
-  shape,
-  color,
-} = require("module"); // => import {
-  thing,
-  anotherThing,
-  widget,
-  shape,
-  color,
- } from "module"
-const { thing: thingRenamed } = require("module"); // => import { thing as thingRenamed } from "module";
+const { thing, thingy: anotherThing } = require("module"); // => import { thing, thingy as anotherThing} from "module"
 ```
+
+#### Multiline syntax currently not supported
 
 ## License
 
