@@ -66,6 +66,34 @@ suite("Extension Test Suite", () => {
     );
   });
 
+  test("Test Several Require Statements With Trailing Rest-Of-Line Comment", async () => {
+    await assert_converted_text_is(
+      `const something = require("example"); // => This is a comment
+const Ben = require("person").name;`,
+      `import something from "example"; // => This is a comment
+import { name as Ben } from "person";`
+    );
+  });
+
+  test("Test One Line Require With Trailing Block Comment", async () => {
+    await assert_converted_text_is(
+      `const something = require("example"); /* => This is a comment */`,
+      `import something from "example"; /* => This is a comment */`
+    );
+  });
+
+  test("Test One Line Require With Trailing Block Comment Unclosed", async () => {
+    await assert_converted_text_is(
+      `const something = require("example"); /* => This is a comment  
+      */
+      `,
+      // should fail to convert because no closing block comment on same line
+      `const something = require("example"); /* => This is a comment  
+      */
+      `
+    );
+  });
+
   test("Test Multiple Line Require Several Aliased Names Then Non-require Statements", async () => {
     await assert_converted_text_is(
       `const {

@@ -10,84 +10,99 @@ function activate(context) {
     "extension.Rona",
     function () {
       const editor = vscode.window.activeTextEditor;
-      const re_general = /^[ \t]*(?<what_to_import_full>(?:const|let|var)\s+(?<what_to_import>{?[\s\w,:]+}?)\s*=)?\s*require\s*\(\s*['"](?<module>.*?)['"]\s*\)(?:\.(?<module_property_access>\w+)?)?(?<call_of_module_or_property>\(\))?[ \t]*;?[ \t]*$/gim;
+      const re_general = /^[ \t]*(?<what_to_import_full>(?:const|let|var)\s+(?<what_to_import>{?[\s\w,:]+}?)\s*=)?\s*require\s*\(\s*['"](?<module>.*?)['"]\s*\)(?:\.(?<module_property_access>\w+)?)?(?<call_of_module_or_property>\(\))?[ \t]*;?(?:[ \t]*|(?<trailing_comment>[ \t]*(?:\/\/.*|\/\*.*\*\/[ \t]*)))$/gim;
       const orig_text = fs.readFileSync(editor.document.uri.fsPath, "utf-8");
       const converted_text = orig_text.replace(
         re_general,
-        (match, p1, p2, p3, p4, p5, offset, string, groups) => {
+        (match, p1, p2, p3, p4, p5, p6, offset, string, groups) => {
           const {
             what_to_import,
             module,
             module_property_access,
             call_of_module_or_property,
+            trailing_comment,
           } = groups;
           const what_to_import_obj = parse_what_to_import(what_to_import);
           if (what_to_import_obj === null) {
             return match;
           }
-          if (what_to_import_obj.type === "empty") {
-            /**
-             * require("things");
-             *   => import "things";
-             */
-            return `import "${module}";`;
-          } else if (what_to_import_obj.type === "scalar") {
-            if (!module_property_access && !call_of_module_or_property) {
+          let converted_js_text = (() => {
+            if (what_to_import_obj.type === "empty") {
               /**
-               * const something = require("example");
-               *   => import something from "example";
+               * require("things");
+               *   => import "things";
                */
-              return `import ${what_to_import_obj.import_module_as} from "${module}";`;
-            } else if (module_property_access && !call_of_module_or_property) {
+              return `import "${module}";`;
+            } else if (what_to_import_obj.type === "scalar") {
+              if (!module_property_access && !call_of_module_or_property) {
+                /**
+                 * const something = require("example");
+                 *   => import something from "example";
+                 */
+                return `import ${what_to_import_obj.import_module_as} from "${module}";`;
+              } else if (
+                module_property_access &&
+                !call_of_module_or_property
+              ) {
+                /**
+                 * const Ben = require("person").name;
+                 *   => import { name as Ben } from "person";
+                 */
+                return `import { ${module_property_access} as ${what_to_import_obj.import_module_as} } from "${module}";`;
+              } else if (
+                !module_property_access &&
+                call_of_module_or_property
+              ) {
+                /**
+                 * const something = require("things")();
+                 *   => import something from "things";
+                 */
+                return `import ${what_to_import_obj.import_module_as} from "${module}";`;
+              } else if (module_property_access && call_of_module_or_property) {
+                /**
+                 * const something = require("things").something();
+                 *   => import { something } from "things";
+                 */
+                return `import { ${what_to_import_obj.import_module_as} } from "${module}";`;
+              }
+            } else if (what_to_import_obj.type === "names") {
               /**
-               * const Ben = require("person").name;
-               *   => import { name as Ben } from "person";
-               */
-              return `import { ${module_property_access} as ${what_to_import_obj.import_module_as} } from "${module}";`;
-            } else if (!module_property_access && call_of_module_or_property) {
-              /**
-               * const something = require("things")();
-               *   => import something from "things";
-               */
-              return `import ${what_to_import_obj.import_module_as} from "${module}";`;
-            } else if (module_property_access && call_of_module_or_property) {
-              /**
-               * const something = require("things").something();
+               * handles all named imports like:
+               *
+               * const { something } = require("things");
                *   => import { something } from "things";
+               *
+               * const { something, anotherThing } = require("things");
+               *   => import { something, anotherThing } from "things";
+               *
+               * const { thing, thingy: anotherThing } = require("module");
+               *   => import { thing, thingy as anotherThing} from "module"
+               *
+               * const {
+               *   thing,
+               *   anotherThing,
+               *   widget: renamedWidget,
+               *   shape: anotherShape,
+               *   color,
+               * } = require("module");
+               *   => import { thing, anotherThing, widget as renamedWidget, shape as anotherShape, color } from "module";
                */
-              return `import { ${what_to_import_obj.import_module_as} } from "${module}";`;
+              const import_names_str = Object.keys(what_to_import_obj.names)
+                .map((name) => {
+                  const alias = what_to_import_obj.names[name];
+                  return name + (alias ? ` as ${alias}` : "");
+                })
+                .join(", ");
+              return `import { ${import_names_str} } from "${module}";`;
             }
-          } else if (what_to_import_obj.type === "names") {
-            /**
-             * handles all named imports like:
-             *
-             * const { something } = require("things");
-             *   => import { something } from "things";
-             *
-             * const { something, anotherThing } = require("things");
-             *   => import { something, anotherThing } from "things";
-             *
-             * const { thing, thingy: anotherThing } = require("module");
-             *   => import { thing, thingy as anotherThing} from "module"
-             *
-             * const {
-             *   thing,
-             *   anotherThing,
-             *   widget: renamedWidget,
-             *   shape: anotherShape,
-             *   color,
-             * } = require("module");
-             *   => import { thing, anotherThing, widget as renamedWidget, shape as anotherShape, color } from "module";
-             */
-            const import_names_str = Object.keys(what_to_import_obj.names)
-              .map((name) => {
-                const alias = what_to_import_obj.names[name];
-                return name + (alias ? ` as ${alias}` : "");
-              })
-              .join(", ");
-            return `import { ${import_names_str} } from "${module}";`;
+            return null;
+          })();
+          if (converted_js_text === null) {
+            return match;
           }
-          return match;
+          return trailing_comment
+            ? converted_js_text + trailing_comment
+            : converted_js_text;
         }
       );
       fs.writeFileSync(editor.document.uri.fsPath, converted_text, "utf-8");
