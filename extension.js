@@ -158,7 +158,7 @@ function parse_what_to_import(what_to_import) {
             if (/^\s*$/.test(tok)) {
               return null;
             }
-            const nameAndAlias = tok.split(/:/);
+            const nameAndAlias = tok.split(/:/g);
             if (nameAndAlias.length > 2) {
               throw new Error(`more than one ':'`);
             }

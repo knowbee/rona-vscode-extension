@@ -106,7 +106,10 @@ suite("Extension Test Suite", () => {
 
   test("Test Several Require Statements Then Non-require Statements", async () => {
     await assert_converted_text_is(
-      // some of these are intentionally missing semicolons
+      /**
+       * some of these are intentionally missing semicolons, to test whether we
+       * can work with or without them.
+       */
       `
       const something = require("example");
       const Ben = require("person").name
