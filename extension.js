@@ -2,6 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 const vscode = require("vscode");
 const fs = require("fs");
+const os = require("os");
 /**
  * @param {vscode.ExtensionContext} context
  */
@@ -26,13 +27,60 @@ function activate(context) {
           if (what_to_import_obj === null) {
             return match;
           }
+          /**
+           * @type {string|null}
+           */
           let converted_js_text = (() => {
+            //
             if (what_to_import_obj.type === "empty") {
-              /**
-               * require("things");
-               *   => import "things";
-               */
-              return `import "${module}";`;
+              if (module_property_access && !call_of_module_or_property) {
+                /**
+                 * require("things").name
+                 *   => ?
+                 *
+                 * Unclear how to represent this as an es6 import. The .name
+                 * access doesn't do anything, and may suggest a user
+                 * mistake.
+                 */
+                return null;
+              } else if (module_property_access && call_of_module_or_property) {
+                /**
+                 * require("things").name()
+                 *   => import { name } from "things";
+                 *      name();
+                 */
+                return `import { ${module_property_access} } from "${module}";${os.EOL}${module_property_access}();`;
+              } else if (
+                !module_property_access &&
+                call_of_module_or_property
+              ) {
+                try {
+                  /**
+                   * require("things")()
+                   *   => import thingsModule from "things";
+                   *      thingsModule();
+                   */
+                  const module_turned_to_var_name = convert_to_js_var_name(
+                    module
+                  );
+                  return `import ${module_turned_to_var_name} from "${module}";${os.EOL}${module_turned_to_var_name}();`;
+                } catch (err) {
+                  /**
+                   * Then the module reference is not representable as a var
+                   * name.
+                   */
+                  return null;
+                }
+              } else if (
+                !module_property_access &&
+                !call_of_module_or_property
+              ) {
+                /**
+                 * require("things");
+                 *   => import "things";
+                 */
+                return `import "${module}";`;
+              }
             } else if (what_to_import_obj.type === "scalar") {
               if (!module_property_access && !call_of_module_or_property) {
                 /**
@@ -219,6 +267,56 @@ function parse_what_to_import(what_to_import) {
  */
 function trim_edges(str) {
   return str.replace(/^\s+/, "").replace(/\s+$/, "");
+}
+
+/**
+ * @param {string} module_reference
+ */
+function convert_to_js_var_name(module_reference) {
+  const module_reference_components = module_reference
+    .replace(/\\/g, "/")
+    .split(/\//g);
+  module_reference_components.reverse();
+  const word_like_component = module_reference_components.find(
+    (component) => !/^\s*$/.test(component)
+  );
+  if (typeof word_like_component === "undefined") {
+    throw new Error(
+      `could not find any components of the module reference suitable for a variable name`
+    );
+  }
+  return convert_to_camel_case(word_like_component) + "Module";
+}
+
+/**
+ * @param {string} str
+ */
+function convert_to_camel_case(str) {
+  str = str
+    .replace(/[^\w\$\-\.]+/g, "")
+    .replace(/\-+/g, "-")
+    .replace(/\.+/g, ".")
+    .replace(/\.(ts|js|jsx|mjs|cjs)$/, "")
+    .replace(/\.+/g, "");
+  const char_array = [...str];
+  let output_char_array = [];
+  while (char_array.length > 0) {
+    const char = char_array.shift();
+    if (char === "-") {
+      /**
+       * capitalize next letter because we are changing e.g.
+       *   "my-module-name" -> "myModuleName".
+       */
+      const next_char = char_array.shift();
+      if (typeof next_char !== "undefined") {
+        output_char_array.push(next_char.toUpperCase());
+      }
+    } else {
+      output_char_array.push(char);
+    }
+  }
+  const output_str = output_char_array.join("");
+  return output_str;
 }
 
 // this method is called when your extension is deactivated

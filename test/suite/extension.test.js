@@ -1,6 +1,7 @@
 const assert = require("assert");
 const fs = require("fs");
 const tmp = require("tmp");
+const os = require("os");
 
 // You can import and use all API from the 'vscode' module
 // as well as import your extension to test it
@@ -49,6 +50,28 @@ suite("Extension Test Suite", () => {
     await assert_converted_text_is(
       `require("../things");`,
       `import "../things";`
+    );
+  });
+
+  test("Test One Line Only Require Then Property", async () => {
+    await assert_converted_text_is(
+      `require("things").name;`,
+      // expected to be ignored
+      `require("things").name;`
+    );
+  });
+
+  test("Test One Line Only Require Then Property Call", async () => {
+    await assert_converted_text_is(
+      `require("things").name();`,
+      `import { name } from "things";${os.EOL}name();`
+    );
+  });
+
+  test("Test One Line Only Require Then Call", async () => {
+    await assert_converted_text_is(
+      `require("@organization/very-long-name.js")();`,
+      `import veryLongNameModule from "@organization/very-long-name.js";${os.EOL}veryLongNameModule();`
     );
   });
 
