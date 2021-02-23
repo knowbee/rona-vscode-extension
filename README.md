@@ -9,6 +9,10 @@ cli tool version of this extension can be found [here](https://www.npmjs.com/pac
 ## Supported conversions
 
 ```js
+require("things").name(); // => import { name } from "things"; name();
+
+require("things")(); // => import thingsModule from "things"; thingsModule();
+
 const something = require("example"); // => import something from "example";
 
 const Ben = require("person").name; // => import { name as Ben } from "person";
