@@ -3,7 +3,7 @@
   "displayName": "Require To Import Syntax",
   "description": "Convert require to ES6 import syntax",
   "publisher": "Bruce",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "icon": "logo.png",
   "engines": {
     "vscode": "^1.43.0"
@@ -20,20 +20,16 @@
   ],
   "main": "./extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "extension.Rona",
-        "title": "convert require to import"
-      }
-    ],
-    "keybindings": [
-      {
-        "command": "extension.Rona",
-        "key": "ctrl+alt+r",
-        "mac": "ctrl+alt+r",
-        "when": "editorTextFocus"
-      }
-    ]
+    "commands": [{
+      "command": "extension.Rona",
+      "title": "convert require to import"
+    }],
+    "keybindings": [{
+      "command": "extension.Rona",
+      "key": "ctrl+alt+r",
+      "mac": "ctrl+alt+r",
+      "when": "editorTextFocus"
+    }]
   },
   "scripts": {
     "lint": "eslint .",
