@@ -2,7 +2,8 @@
 
 convert require syntax to ES6 import syntax in the current opened file
 
-`CTRL+ALT+R`
+- Save the file
+- `CTRL+ALT+R`
 
 cli tool version of this extension can be found [here](https://www.npmjs.com/package/rona)
 
